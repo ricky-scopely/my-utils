@@ -96,17 +96,17 @@ end
 app_data = {} 
 options = {}
 
-OptionParser.new do |opts|
+optparse = OptionParser.new do |opts|
   
   ENVIRONMENTS = APPS.keys.map {|k| k.to_s}
 
   opts.banner = "Usage: #{ARGV[0]} [options]"
 
-  opts.on("-v", "--version VERSION", String, "Application version to fetch") do |v|
+  opts.on("-v", "--version VERSION", String, "Application version to fetch. Required.") do |v|
     options[:app_version] = v
   end
 
-  opts.on("-e", "--environment ENV", ENVIRONMENTS, "Environment app to fetch") do |e|
+  opts.on("-e", "--environment ENV", ENVIRONMENTS, "Environment app to fetch. Required.") do |e|
       options[:environment] = e
   end
   
@@ -114,7 +114,20 @@ OptionParser.new do |opts|
     options[:print_metadata] = m
   end
 
-end.parse!
+end
+
+begin
+  optparse.parse!
+  mandatory = [:app_version, :environment]
+  missing = mandatory.select{ |param| options[param].nil? }
+  unless missing.empty?
+    raise OptionParser::MissingArgument.new(missing.join(', '))
+  end
+rescue OptionParser::InvalidOption, OptionParser::MissingArgument
+  puts $!.to_s
+  puts optparse
+  exit
+end    
 
 g_app_version = options[:app_version]
 g_environment = options[:environment]
