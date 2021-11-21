@@ -1,0 +1,2 @@
+#!/bin/sh
+ruby get-latest-release-appcenter.rb $@
